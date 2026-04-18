@@ -1,0 +1,53 @@
+import json
+import time
+import random
+import paho.mqtt.client as mqtt
+
+BROKER = "mqtt.thingsboard.cloud"
+PORT = 1883
+TOKEN = "UXQke4DUxFCbJlIvVKz2"
+
+PUB_TOPIC = "v1/devices/me/telemetry"
+
+def ml_predict(rsrp, sinr, latency):
+    if rsrp > -75 and sinr > 15 and latency < 40:
+        return "Good"
+    elif rsrp > -85 and sinr > 8:
+        return "Average"
+    else:
+        return "Poor"
+
+def on_connect(client, userdata, flags, rc):
+    if rc == 0:
+        print("✅ Connected to ThingsBoard!")
+    else:
+        print("❌ Connection failed! RC:", rc)
+
+client = mqtt.Client()
+client.username_pw_set(TOKEN)
+client.on_connect = on_connect
+
+print("Connecting to ThingsBoard...")
+client.connect(BROKER, PORT, 60)
+client.loop_start()
+
+time.sleep(2)
+
+print("ML Bridge Running...")
+
+while True:
+    # Simulate same values as ESP32
+    rsrp = random.randint(-95, -65)
+    sinr = random.randint(5, 25)
+    latency = random.randint(20, 120)
+
+    # ML Prediction
+    quality = ml_predict(rsrp, sinr, latency)
+
+    # Publish ml_quality to ThingsBoard
+    out = json.dumps({"ml_quality": quality})
+    client.publish(PUB_TOPIC, out)
+
+    print(f"✅ ML Quality: {quality} | RSRP: {rsrp} | SINR: {sinr} | Latency: {latency}")
+
+    time.sleep(5)
