@@ -1,0 +1,20 @@
+# PlatformIO
+.pio/
+.vscode/
+*.orig
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+venv/
+
+# OS Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Credentials (important!)
+secrets.h
+config.h
